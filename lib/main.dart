@@ -105,19 +105,216 @@ class FitnessButton extends StatelessWidget {
 }
 
 // Workout tracker page
-class WorkoutTrackerPage extends StatelessWidget {
+
+class WorkoutTrackerPage extends StatefulWidget {
+  @override
+  _WorkoutTrackerPageState createState() => _WorkoutTrackerPageState();
+}
+
+class _WorkoutTrackerPageState extends State<WorkoutTrackerPage> {
+  final List<Map<String, String>> _workouts = [];
+
+  final _dateController = TextEditingController();
+  final _activityController = TextEditingController();
+  final _caloriesController = TextEditingController();
+  final _timeController = TextEditingController();
+  final _distanceController = TextEditingController();
+  final _setsController = TextEditingController();
+  final _repsController = TextEditingController();
+  final _weightController = TextEditingController();
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _activityController.dispose();
+    _caloriesController.dispose();
+    _timeController.dispose();
+    _distanceController.dispose();
+    _setsController.dispose();
+    _repsController.dispose();
+    _weightController.dispose();
+    super.dispose();
+  }
+
+  void _addWorkout() {
+    setState(() {
+      _workouts.add({
+        'Date': _dateController.text,
+        'Activity': _activityController.text,
+        'Calories': _caloriesController.text,
+        'Time': _timeController.text,
+        'Distance': _distanceController.text,
+        'Sets': _setsController.text,
+        'Reps': _repsController.text,
+        'Weight': _weightController.text,
+      });
+    });
+
+    _dateController.clear();
+    _activityController.clear();
+    _caloriesController.clear();
+    _timeController.clear();
+    _distanceController.clear();
+    _setsController.clear();
+    _repsController.clear();
+    _weightController.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Workout Tracker'),
+      body: Stack(
+        children: [
+          // Background image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('images/workouttracker2.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          // Main content with AppBar and workout tracker
+          Column(
+            children: [
+              AppBar(
+                title: Text(
+                  'Workout Tracker',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, // Bold title
+                  ),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        // Row with GIFs
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'images/gym2.gif',
+                              width: 150,
+                              height: 150,
+                              fit: BoxFit.cover,
+                            ),
+                            SizedBox(width: 10),
+                            Image.asset(
+                              'images/running.gif',
+                              width: 150,
+                              height: 150,
+                              fit: BoxFit.cover,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          'Track your workouts here!',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        _buildInputForm(),
+                        SizedBox(height: 20),
+                        _buildWorkoutTable(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
-      body: Center(
-        child: Text('Track your workouts here!'),
+    );
+  }
+
+  Widget _buildInputForm() {
+    return Column(
+      children: [
+        _buildTextField(_dateController, 'Date (e.g., 2024-10-27)'),
+        _buildTextField(_activityController, 'Activity'),
+        _buildTextField(_caloriesController, 'Calories'),
+        _buildTextField(_timeController, 'Time (e.g., 30 mins)'),
+        _buildTextField(_distanceController, 'Distance (e.g., 5 km)'),
+        _buildTextField(_setsController, 'Sets'),
+        _buildTextField(_repsController, 'Reps'),
+        _buildTextField(_weightController, 'Weight (e.g., 135 lbs)'),
+        SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: _addWorkout,
+          child: Text('Add Workout'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderSide: BorderSide(width: 2.0, color: Colors.black),
+        ),
+        labelText: label,
+        labelStyle: TextStyle(
+          fontWeight: FontWeight.bold, // Bolden label text
+        ),
+      ),
+      style: TextStyle(
+        fontWeight: FontWeight.bold, // Bolden input text
+      ),
+      enableSuggestions: false, // Disables suggestions and toolbar
+      autocorrect: false, // Disables autocorrection
+    ),
+  );
+}
+
+
+  Widget _buildWorkoutTable() {
+    return Scrollbar(
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columns: [
+            DataColumn(label: Text('Date', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Activity', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Calories', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Time', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Distance', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Sets', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Reps', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Weight', style: TextStyle(fontWeight: FontWeight.bold))),
+          ],
+          rows: _workouts.map((workout) {
+            return DataRow(cells: [
+              DataCell(Text(workout['Date'] ?? '', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataCell(Text(workout['Activity'] ?? '', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataCell(Text(workout['Calories'] ?? '', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataCell(Text(workout['Time'] ?? '', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataCell(Text(workout['Distance'] ?? '', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataCell(Text(workout['Sets'] ?? '', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataCell(Text(workout['Reps'] ?? '', style: TextStyle(fontWeight: FontWeight.bold))),
+              DataCell(Text(workout['Weight'] ?? '', style: TextStyle(fontWeight: FontWeight.bold))),
+            ]);
+          }).toList(),
+        ),
       ),
     );
   }
 }
+
+
 
 // Cooldown page with breathing exercise
 class CooldownPage extends StatefulWidget {
