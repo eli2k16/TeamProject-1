@@ -38,7 +38,7 @@ class HomePage extends StatelessWidget {
             left: 0,
             right: 0,
             child: Text(
-              'myWorkout Tracker',
+              'Workout Tracker',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -80,17 +80,17 @@ class HomePage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      FitnessButton(label: 'myWorkouts', page: WorkoutTrackerPage()), 
-                      FitnessButton(label: 'myCooldown', page: CooldownPage()), 
-                      FitnessButton(label: 'myProgress', page: ProgressTrackerPage()), 
+                      FitnessButton(label: 'Workouts', page: WorkoutTrackerPage()), 
+                      FitnessButton(label: 'Cooldown', page: CooldownPage()), 
+                      FitnessButton(label: 'Progress', page: ProgressTrackerPage()), 
                     ],
                   ),
                   SizedBox(height: 30),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      FitnessButton(label: 'myCalories', page: CaloriesTrackerPage()), 
-                      FitnessButton(label: 'myMeals', page: MealPlannerPage()), 
+                      FitnessButton(label: 'Calories', page: CaloriesTrackerPage()), 
+                      FitnessButton(label: 'Meals', page: MealPlannerPage()), 
                     ],
                   ),
                 ],
@@ -562,7 +562,7 @@ class _CooldownPageState extends State<CooldownPage> {
                 children: [
                   SizedBox(height: 80), // Adjust height to move title up closer to app bar
                   Text(
-                    'myCooldown', // Title text
+                    'Cooldown', // Title text
                     style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   SizedBox(height: 10), // Reduce space below the title
@@ -768,31 +768,399 @@ class _ProgressTrackerPageState extends State<ProgressTrackerPage> {
 
 
 // Calories tracker page
-class CaloriesTrackerPage extends StatelessWidget {
+
+class CaloriesTrackerPage extends StatefulWidget {
+  @override
+  _CaloriesTrackerPageState createState() => _CaloriesTrackerPageState();
+}
+
+class _CaloriesTrackerPageState extends State<CaloriesTrackerPage> {
+  final List<Map<String, dynamic>> _activities = []; // Start with an empty list
+  DateTime? _selectedDate;
+
+  void _addCalories() {
+    // Opens a dialog for adding new activity data
+    showDialog(
+      context: context,
+      builder: (context) {
+        String activity = '';
+        String calories = '';
+
+        return AlertDialog(
+          title: Text('Add Activity'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Date picker
+              TextField(
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: _selectedDate == null ? 'Select Date' : _selectedDate!.toLocal().toString().split(' ')[0],
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.calendar_today),
+                    onPressed: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                      );
+                      if (picked != null && picked != _selectedDate)
+                        setState(() {
+                          _selectedDate = picked;
+                        });
+                    },
+                  ),
+                ),
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Activity'),
+                onChanged: (value) {
+                  activity = value;
+                },
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Calories Burned'),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  calories = value;
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (activity.isNotEmpty && calories.isNotEmpty && _selectedDate != null) {
+                  setState(() {
+                    _activities.add({
+                      'date': _selectedDate!,
+                      'activity': activity,
+                      'calories': int.tryParse(calories) ?? 0,
+                    });
+                    _selectedDate = null; // Reset the date after adding
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Calories Tracker'),
+        backgroundColor: Colors.transparent, // Make AppBar transparent
+        elevation: 0, // Remove shadow
       ),
-      body: Center(
-        child: Text('Track your calories burned here!'),
+      body: Stack(
+        children: [
+          // Background image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('images/calories.jpg'), // Replace with your image path
+                fit: BoxFit.cover, // Cover the entire screen
+              ),
+            ),
+          ),
+          // Main content
+          Column(
+            children: [
+              // Table for displaying activities and calories burned
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Table(
+                  border: TableBorder.all(),
+                  columnWidths: {
+                    0: FlexColumnWidth(1),
+                    1: FlexColumnWidth(2),
+                    2: FlexColumnWidth(1),
+                  },
+                  children: [
+                    TableRow(
+                      decoration: BoxDecoration(color: Colors.blueGrey.shade100),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Date',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Activity',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Calories Burned',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Dynamically generated rows from _activities list
+                    ..._activities.map((activity) => TableRow(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(activity['date']?.toLocal().toString().split(' ')[0] ?? '-'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(activity['activity']),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('${activity['calories']}'),
+                            ),
+                          ],
+                        )),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+              // Button to add new activity
+              ElevatedButton(
+                onPressed: _addCalories,
+                child: Text('Add Calories'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
 // Meal planner page
-class MealPlannerPage extends StatelessWidget {
+
+class MealPlannerPage extends StatefulWidget {
+  @override
+  _MealPlannerPageState createState() => _MealPlannerPageState();
+}
+
+class _MealPlannerPageState extends State<MealPlannerPage> {
+  final List<Map<String, dynamic>> _meals = []; // Start with an empty list
+  DateTime? _selectedDate;
+
+  void _addMeal() {
+    // Opens a dialog for adding new meal data
+    showDialog(
+      context: context,
+      builder: (context) {
+        String breakfast = '';
+        String lunch = '';
+        String dinner = '';
+        String snacks = '';
+
+        return AlertDialog(
+          title: Text('Add Meal'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Date picker
+              TextField(
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: _selectedDate == null ? 'Select Date' : _selectedDate!.toLocal().toString().split(' ')[0],
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.calendar_today),
+                    onPressed: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                      );
+                      if (picked != null && picked != _selectedDate)
+                        setState(() {
+                          _selectedDate = picked;
+                        });
+                    },
+                  ),
+                ),
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Breakfast'),
+                onChanged: (value) {
+                  breakfast = value;
+                },
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Lunch'),
+                onChanged: (value) {
+                  lunch = value;
+                },
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Dinner'),
+                onChanged: (value) {
+                  dinner = value;
+                },
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Snacks'),
+                onChanged: (value) {
+                  snacks = value;
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (_selectedDate != null) {
+                  setState(() {
+                    _meals.add({
+                      'date': _selectedDate!,
+                      'breakfast': breakfast,
+                      'lunch': lunch,
+                      'dinner': dinner,
+                      'snacks': snacks,
+                    });
+                    _selectedDate = null; // Reset the date after adding
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Meal Planner'),
-      ),
-      body: Center(
-        child: Text('Plan your meals here!'),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('images/meal.jpg'), // Path to your background image
+            fit: BoxFit.cover, // Cover the whole screen
+          ),
+        ),
+        child: Column(
+          children: [
+            Container(
+              color: Colors.black.withOpacity(0.1), // Semi-transparent black background for AppBar
+              child: AppBar(
+                title: Text('Meal Tracker'),
+                backgroundColor: Colors.transparent, // Make AppBar transparent
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Table for displaying meals
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Table(
+                        border: TableBorder.all(),
+                        columnWidths: {
+                          0: FlexColumnWidth(2),
+                          1: FlexColumnWidth(3),
+                          2: FlexColumnWidth(2),
+                          3: FlexColumnWidth(2),
+                          4: FlexColumnWidth(2),
+                        },
+                        children: [
+                          TableRow(
+                            decoration: BoxDecoration(color: Colors.blueGrey.shade100),
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(9.0),
+                                child: Text(
+                                  'Date',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Breakfast',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Lunch',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Dinner',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Snacks',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Dynamically generated rows from _meals list
+                          ..._meals.map((meal) => TableRow(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(meal['date']?.toLocal().toString().split(' ')[0] ?? '-'),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(meal['breakfast'] ?? '-'),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(meal['lunch'] ?? '-'),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(meal['dinner'] ?? '-'),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(meal['snacks'] ?? '-'),
+                                  ),
+                                ],
+                              )),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    // Button to add new meal
+                    ElevatedButton(
+                      onPressed: _addMeal,
+                      child: Text('Add Meal'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+

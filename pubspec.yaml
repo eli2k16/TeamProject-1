@@ -62,6 +62,8 @@ flutter:
     - images/workouttracker2.jpg
     - images/progresstracker.jpg
     - images/lightblue.jpg
+    - images/calories.jpg
+    - images/meal.jpg
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
