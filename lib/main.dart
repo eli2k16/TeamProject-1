@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'animate_gradient.dart'; // Import the animated gradient
-import 'dart:async'; // For Timer
+import 'animate_gradient.dart';
+import 'dart:async';
 
 void main() {
   runApp(FitnessApp());
@@ -19,66 +19,86 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('images/wallpaper1.jpg'),
-            fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          // Background image
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('images/wallpaper1.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            SizedBox(height: 100), // Height for the title area
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0, bottom: 20.0), // Adjust padding here
-              child: Column(
+          // Title positioned lower
+          Positioned(
+            top: 140,
+            left: 0,
+            right: 0,
+            child: Text(
+              'myWorkout Tracker',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 98, 88, 88),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          // Settings button at the top right
+          Positioned(
+            top: 40,
+            right: 16,
+            child: IconButton(
+              icon: Icon(Icons.settings, color: Colors.black),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsPage()),
+                );
+              },
+            ),
+          ),
+          // Subtitle and buttons
+          Column(
+            children: [
+              SizedBox(height: 190), // Space below the title and settings icon
+              Text(
+                'Track your workouts and progress.',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Color.fromARGB(255, 98, 88, 88),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 450), // Adjust this space to move buttons lower on the page
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'myWorkout Tracker', // Title text
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: const Color.fromARGB(255, 98, 88, 88), // Adjust text color to contrast the background
-                    ),
-                    textAlign: TextAlign.center,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      FitnessButton(label: 'myWorkouts', page: WorkoutTrackerPage()), 
+                      FitnessButton(label: 'myCooldown', page: CooldownPage()), 
+                      FitnessButton(label: 'myProgress', page: ProgressTrackerPage()), 
+                    ],
                   ),
-                  Text(
-                    'Track your workouts and progress.', // Subtitle text
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: const Color.fromARGB(255, 98, 88, 88), // Adjust text color for subtitle
-                    ),
-                    textAlign: TextAlign.center,
+                  SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      FitnessButton(label: 'myCalories', page: CaloriesTrackerPage()), 
+                      FitnessButton(label: 'myMeals', page: MealPlannerPage()), 
+                    ],
                   ),
                 ],
               ),
-            ),
-            SizedBox(height: 500), // Add space to lower the buttons
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    FitnessButton(label: 'myWorkouts', page: WorkoutTrackerPage()), // Button 1
-                    FitnessButton(label: 'myCooldown', page: CooldownPage()), // Button 2
-                    FitnessButton(label: 'myProgress', page: ProgressTrackerPage()), // Button 3
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    FitnessButton(label: 'myCalories', page: CaloriesTrackerPage()), // Button 4
-                    FitnessButton(label: 'myMeals', page: MealPlannerPage()), // Button 5
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
+              SizedBox(height: 50),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -104,6 +124,154 @@ class FitnessButton extends StatelessWidget {
   }
 }
 
+
+
+class SettingsPage extends StatefulWidget {
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+  String? _gender;
+  double? _bmi;
+
+  void _calculateBMI() {
+    final double height = double.tryParse(_heightController.text) ?? 0;
+    final double weight = double.tryParse(_weightController.text) ?? 0;
+
+    if (height > 0 && weight > 0) {
+      setState(() {
+        _bmi = weight / ((height / 100) * (height / 100));
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Background image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('images/lightblue.jpg'), // Use your image here
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          // Main content with AppBar and form fields
+          Column(
+            children: [
+              // Transparent AppBar with back button
+              AppBar(
+                title: Text(
+                  'Settings',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              // Form content with scrollable view
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Gender',
+                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.8),
+                        ),
+                        value: _gender,
+                        items: ['Male', 'Female'].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _gender = newValue;
+                          });
+                        },
+                      ),
+                      SizedBox(height: 20),
+                      _buildTextField(_ageController, 'Age'),
+                      SizedBox(height: 20),
+                      _buildTextField(_heightController, 'Height (cm)'),
+                      SizedBox(height: 20),
+                      _buildTextField(_weightController, 'Weight (kg)'),
+                      SizedBox(height: 30),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: _calculateBMI,
+                          child: Text('Calculate BMI'),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      if (_bmi != null)
+                        Center(
+                          child: Text(
+                            'Your BMI is: ${_bmi!.toStringAsFixed(1)}',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderSide: BorderSide(width: 2.0, color: Colors.black),
+          ),
+          labelText: label,
+          labelStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.8),
+        ),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+        enableSuggestions: false,
+        autocorrect: false,
+      ),
+    );
+  }
+}
+
+  
+
+  
 // Workout tracker page
 
 class WorkoutTrackerPage extends StatefulWidget {
@@ -457,19 +625,147 @@ class _CooldownPageState extends State<CooldownPage> {
 }
 
 // Progress tracker page
-class ProgressTrackerPage extends StatelessWidget {
+
+
+class ProgressTrackerPage extends StatefulWidget {
+  @override
+  _ProgressTrackerPageState createState() => _ProgressTrackerPageState();
+}
+
+class _ProgressTrackerPageState extends State<ProgressTrackerPage> {
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _bodyWeightController = TextEditingController();
+  final TextEditingController _workoutController = TextEditingController();
+  final TextEditingController _timeController = TextEditingController();
+  final TextEditingController _newMaxController = TextEditingController();
+
+  final List<Map<String, String>> _progressEntries = [];
+
+  void _addProgress() {
+    setState(() {
+      _progressEntries.add({
+        'Date': _dateController.text,
+        'Body Weight': _bodyWeightController.text,
+        'Workout': _workoutController.text,
+        'Time': _timeController.text,
+        'New Max': _newMaxController.text,
+      });
+
+      // Clear the fields after adding
+      _dateController.clear();
+      _bodyWeightController.clear();
+      _workoutController.clear();
+      _timeController.clear();
+      _newMaxController.clear();
+    });
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderSide: BorderSide(width: 2.0, color: Colors.black),
+          ),
+          labelText: label,
+          labelStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+        enableSuggestions: false,
+        autocorrect: false,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Progress Tracker'),
-      ),
-      body: Center(
-        child: Text('Track your progress over time here!'),
+      body: Stack(
+        children: [
+          // Background image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('images/progresstracker.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          // Main content with AppBar and workout tracker
+          Column(
+            children: [
+              AppBar(
+                title: Text(
+                  'Progress Tracker',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                centerTitle: true,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTextField(_dateController, 'Date'),
+                      _buildTextField(_bodyWeightController, 'Body Weight'),
+                      _buildTextField(_workoutController, 'Workout'),
+                      _buildTextField(_timeController, 'Time'),
+                      _buildTextField(_newMaxController, 'New Max (e.g., 200 lbs)'),
+                      SizedBox(height: 20),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: _addProgress,
+                          child: Text('Add Progress'),
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _progressEntries.length,
+                          itemBuilder: (context, index) {
+                            final entry = _progressEntries[index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Date: ${entry['Date']}'),
+                                  Text('Body Weight: ${entry['Body Weight']}'),
+                                  Text('Workout: ${entry['Workout']}'),
+                                  Text('Time: ${entry['Time']}'),
+                                  Text('New Max: ${entry['New Max']}'),
+                                  Divider(),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
+
+  
+
 
 // Calories tracker page
 class CaloriesTrackerPage extends StatelessWidget {
